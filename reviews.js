@@ -1,41 +1,70 @@
-<script>
-  // Google Sheet URL published as CSV (Update this link with your sheet's published CSV link)
-  const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTfILz4H_k-hywt-s1D7n6Vvs3Sp_97ouZY-CdT0zu8dgkCKLdutfAgl1TOnqlKcYSc2nZgFVon6Nwi/pub?output=csv';
+// reviews.js
+const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vT-aDDMSlRPZWybuzjfxB0ip_F-YuNiITedkjYSYQGCV7amDV5kqihqQ7ajZFxwPJb59wxxpkiVblAf/pub?output=csv';
 
-  async function fetchLeaderboardData() {
-    const response = await fetch(sheetUrl);
-    const text = await response.text();
+function parseName(email) {
+  const namePart = email.split('@')[0];
+  const parts = namePart.split('.');
+  const capitalized = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1));
+  return capitalized.join(' ');
+}
 
-    const rows = text.trim().split('\n').slice(1); // Skip header
-    const data = rows.map(row => {
-      const [email, count] = row.split(',');
-      const name = email.split('@')[0].replace(/\./g, ' ').replace(/\b\w/g, l => l.toUpperCase()); // Clean name
-      return { email, name, count: parseInt(count) };
-    });
-
-    // Sort by review count descending
+async function fetchAndUpdate() {
+  try {
+    const res = await fetch(sheetURL);
+    const text = await res.text();
+    const lines = text.trim().split(/\r?\n/);
+    if (lines.length === 0) return;
+    const headers = lines[0].split(',').map(h => h.trim());
+    const emailIndex = headers.indexOf('Email Address');
+    const countIndex = headers.indexOf('COUNTA of Customer Trail ID');
+    if (emailIndex === -1 || countIndex === -1) {
+      console.error('CSV headers not found');
+      return;
+    }
+    const data = [];
+    for (let i = 1; i < lines.length; i++) {
+      if (!lines[i].trim()) continue;
+      const row = lines[i].split(',');
+      if (row.length <= Math.max(emailIndex, countIndex)) continue;
+      const email = row[emailIndex].trim();
+      const count = parseInt(row[countIndex].trim(), 10);
+      if (!email || isNaN(count)) continue;
+      const name = parseName(email);
+      data.push({ name, count });
+    }
     data.sort((a, b) => b.count - a.count);
-
-    // Render
-    const leaderboardBody = document.getElementById('leaderboard-body');
-    leaderboardBody.innerHTML = '';
-
-    data.forEach((item, index) => {
+    const tbody = document.getElementById('leaderboard-body');
+    tbody.innerHTML = '';
+    data.forEach((item, i) => {
       const tr = document.createElement('tr');
-      tr.innerHTML = `
-        <td class="py-2 px-4 text-center">${index + 1}</td>
-        <td class="py-2 px-4">${item.name}</td>
-        <td class="py-2 px-4 text-center font-semibold ${index === 0 ? 'text-green-600 text-xl' : ''}">
-          ${item.count}
-        </td>
-      `;
-      leaderboardBody.appendChild(tr);
+      // Highlight top 3 with colors
+      if (i === 0) tr.classList.add('bg-yellow-300', 'text-black');
+      else if (i === 1) tr.classList.add('bg-gray-300', 'text-black');
+      else if (i === 2) tr.classList.add('bg-orange-300', 'text-black');
+      const tdRank = document.createElement('td');
+      tdRank.className = 'px-4 py-2 border border-gray-700 text-3xl text-center';
+      tdRank.textContent = i + 1;
+      const tdName = document.createElement('td');
+      tdName.className = 'px-4 py-2 border border-gray-700 text-3xl text-left';
+      // Add medal emojis for top 3
+      if (i === 0) tdName.textContent = '🥇 ' + item.name;
+      else if (i === 1) tdName.textContent = '🥈 ' + item.name;
+      else if (i === 2) tdName.textContent = '🥉 ' + item.name;
+      else tdName.textContent = item.name;
+      const tdCount = document.createElement('td');
+      tdCount.className = 'px-4 py-2 border border-gray-700 text-3xl text-center';
+      tdCount.textContent = item.count;
+      tr.appendChild(tdRank);
+      tr.appendChild(tdName);
+      tr.appendChild(tdCount);
+      tbody.appendChild(tr);
     });
+  } catch (error) {
+    console.error('Error fetching or processing data', error);
   }
+}
 
-  // Initial load
-  fetchLeaderboardData();
-
-  // Auto-refresh leaderboard every 60 seconds
-  setInterval(fetchLeaderboardData, 60000);
-</script>
+document.addEventListener('DOMContentLoaded', () => {
+  fetchAndUpdate();
+  setInterval(fetchAndUpdate, 60000);
+});
