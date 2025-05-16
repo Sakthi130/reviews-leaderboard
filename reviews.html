@@ -1,27 +1,28 @@
-<!-- reviews.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Leaderboard</title>
-  <link rel="icon" type="image/x-icon" href="data:image/x-icon;base64,AA==">
-  <!-- Tailwind CSS via CDN -->
-  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="style.css" />
 </head>
-<body class="bg-gray-800 text-white p-8">
-  <h1 class="text-6xl font-bold mb-6 text-center">Leaderboard</h1>
-  <table class="table-auto w-full border-collapse border border-gray-700">
-    <thead>
-      <tr class="bg-gray-900">
-        <th class="px-4 py-3 border border-gray-700 text-3xl text-center">Rank</th>
-        <th class="px-4 py-3 border border-gray-700 text-3xl text-left">Name</th>
-        <th class="px-4 py-3 border border-gray-700 text-3xl text-center">Review Count</th>
-      </tr>
-    </thead>
-    <tbody id="leaderboard-body">
-      <!-- Data will be injected here -->
-    </tbody>
-  </table>
+<body>
+  <div class="container">
+    <h1>Leaderboard</h1>
+    <table id="leaderboard-table">
+      <thead>
+        <tr>
+          <th>Rank</th>
+          <th>Name</th>
+          <th>Review Count</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Table rows will be inserted here -->
+      </tbody>
+    </table>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
   <script src="reviews.js"></script>
 </body>
 </html>
