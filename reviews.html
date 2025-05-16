@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Review Leaderboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 p-6">
+  <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center text-blue-600">📋 Review Leaderboard</h1>
+    <table class="min-w-full text-sm text-left border border-gray-300 shadow-lg rounded-lg">
+      <thead class="bg-blue-100 text-gray-700">
+        <tr>
+          <th class="py-2 px-4 text-center">Rank</th>
+          <th class="py-2 px-4">Name</th>
+          <th class="py-2 px-4 text-center">Review Count</th>
+        </tr>
+      </thead>
+      <tbody id="leaderboard-body" class="bg-white divide-y"></tbody>
+    </table>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
