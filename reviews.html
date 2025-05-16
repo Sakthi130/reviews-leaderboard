@@ -1,26 +1,26 @@
+<!-- reviews.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Review Leaderboard</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <title>Leaderboard</title>
+  <!-- Tailwind CSS via CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body class="bg-gray-50 p-6">
-  <div class="max-w-2xl mx-auto bg-white p-6 rounded-lg shadow-lg">
-    <h1 class="text-2xl font-bold mb-4 text-center text-blue-600">📋 Review Leaderboard</h1>
-    <table class="min-w-full text-sm text-left border border-gray-300 shadow-lg rounded-lg">
-      <thead class="bg-blue-100 text-gray-700">
-        <tr>
-          <th class="py-2 px-4 text-center">Rank</th>
-          <th class="py-2 px-4">Name</th>
-          <th class="py-2 px-4 text-center">Review Count</th>
-        </tr>
-      </thead>
-      <tbody id="leaderboard-body" class="bg-white divide-y"></tbody>
-    </table>
-  </div>
-
-  <script src="script.js"></script>
+<body class="bg-gray-800 text-white p-8">
+  <h1 class="text-6xl font-bold mb-6 text-center">Leaderboard</h1>
+  <table class="table-auto w-full border-collapse border border-gray-700">
+    <thead>
+      <tr class="bg-gray-900">
+        <th class="px-4 py-3 border border-gray-700 text-3xl text-center">Rank</th>
+        <th class="px-4 py-3 border border-gray-700 text-3xl text-left">Name</th>
+        <th class="px-4 py-3 border border-gray-700 text-3xl text-center">Review Count</th>
+      </tr>
+    </thead>
+    <tbody id="leaderboard-body">
+      <!-- Data will be injected here -->
+    </tbody>
+  </table>
+  <script src="reviews.js"></script>
 </body>
 </html>
