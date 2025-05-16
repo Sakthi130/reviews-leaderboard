@@ -1,70 +1,53 @@
-// reviews.js
-const sheetURL = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTaYVCNVbwusD3ykt6zDrfNQuNTVmk9W2CVxodvOvvNbOL2qH5FPFEW6jJ-Ld6JXkt7m8b2lqKlZMfv/pub?gid=1831553687&single=true&output=csv';
+document.addEventListener('DOMContentLoaded', function() {
+  const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vTaYVCNVbwusD3ykt6zDrfNQuNTVmk9W2CVxodvOvvNbOL2qH5FPFEW6jJ-Ld6JXkt7m8b2lqKlZMfv/pub?output=csv';
+  
+  Papa.parse(csvUrl, {
+    download: true,
+    header: true,
+    skipEmptyLines: true,
+    complete: function(results) {
+      const emailKey = 'Email Address';
+      const countKey = 'COUNTA of Customer Trail ID';
+      // Filter out any empty or total rows
+      const filteredData = results.data.filter(row => row[emailKey] && row[emailKey] !== 'Grand Total');
+      // Sort by review count descending
+      filteredData.sort((a, b) => parseInt(b[countKey]) - parseInt(a[countKey]));
 
-function parseName(email) {
-  const namePart = email.split('@')[0];
-  const parts = namePart.split('.');
-  const capitalized = parts.map(p => p.charAt(0).toUpperCase() + p.slice(1));
-  return capitalized.join(' ');
-}
+      const tableBody = document.querySelector('#leaderboard-table tbody');
+      filteredData.forEach((row, index) => {
+        const rank = index + 1;
+        const email = row[emailKey];
+        // Convert email to "Firstname Lastname"
+        let namePart = email.split('@')[0];
+        let name = namePart.split(/[._\-]/).map(part => part.charAt(0).toUpperCase() + part.slice(1)).join(' ');
 
-async function fetchAndUpdate() {
-  try {
-    const res = await fetch(sheetURL);
-    const text = await res.text();
-    const lines = text.trim().split(/\r?\n/);
-    if (lines.length === 0) return;
-    const headers = lines[0].split(',').map(h => h.trim());
-    const emailIndex = headers.indexOf('Email Address');
-    const countIndex = headers.indexOf('COUNTA of Customer Trail ID');
-    if (emailIndex === -1 || countIndex === -1) {
-      console.error('CSV headers not found');
-      return;
+        const tr = document.createElement('tr');
+        const rankCell = document.createElement('td');
+        const nameCell = document.createElement('td');
+        const countCell = document.createElement('td');
+
+        // Add medal emoji for top 3 ranks
+        if (rank === 1) {
+          rankCell.textContent = `🥇 ${rank}`;
+          tr.classList.add('first-place');
+        } else if (rank === 2) {
+          rankCell.textContent = `🥈 ${rank}`;
+          tr.classList.add('second-place');
+        } else if (rank === 3) {
+          rankCell.textContent = `🥉 ${rank}`;
+          tr.classList.add('third-place');
+        } else {
+          rankCell.textContent = rank;
+        }
+
+        nameCell.textContent = name;
+        countCell.textContent = row[countKey];
+
+        tr.appendChild(rankCell);
+        tr.appendChild(nameCell);
+        tr.appendChild(countCell);
+        tableBody.appendChild(tr);
+      });
     }
-    const data = [];
-    for (let i = 1; i < lines.length; i++) {
-      if (!lines[i].trim()) continue;
-      const row = lines[i].split(',');
-      if (row.length <= Math.max(emailIndex, countIndex)) continue;
-      const email = row[emailIndex].trim();
-      const count = parseInt(row[countIndex].trim(), 10);
-      if (!email || isNaN(count)) continue;
-      const name = parseName(email);
-      data.push({ name, count });
-    }
-    data.sort((a, b) => b.count - a.count);
-    const tbody = document.getElementById('leaderboard-body');
-    tbody.innerHTML = '';
-    data.forEach((item, i) => {
-      const tr = document.createElement('tr');
-      // Highlight top 3 with colors
-      if (i === 0) tr.classList.add('bg-yellow-300', 'text-black');
-      else if (i === 1) tr.classList.add('bg-gray-300', 'text-black');
-      else if (i === 2) tr.classList.add('bg-orange-300', 'text-black');
-      const tdRank = document.createElement('td');
-      tdRank.className = 'px-4 py-2 border border-gray-700 text-3xl text-center';
-      tdRank.textContent = i + 1;
-      const tdName = document.createElement('td');
-      tdName.className = 'px-4 py-2 border border-gray-700 text-3xl text-left';
-      // Add medal emojis for top 3
-      if (i === 0) tdName.textContent = '🥇 ' + item.name;
-      else if (i === 1) tdName.textContent = '🥈 ' + item.name;
-      else if (i === 2) tdName.textContent = '🥉 ' + item.name;
-      else tdName.textContent = item.name;
-      const tdCount = document.createElement('td');
-      tdCount.className = 'px-4 py-2 border border-gray-700 text-3xl text-center';
-      tdCount.textContent = item.count;
-      tr.appendChild(tdRank);
-      tr.appendChild(tdName);
-      tr.appendChild(tdCount);
-      tbody.appendChild(tr);
-    });
-  } catch (error) {
-    console.error('Error fetching or processing data', error);
-  }
-}
-
-document.addEventListener('DOMContentLoaded', () => {
-  fetchAndUpdate();
-  setInterval(fetchAndUpdate, 60000);
+  });
 });
